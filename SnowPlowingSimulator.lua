@@ -31,12 +31,25 @@ end
 -- Function to automate snow farming
 local function autoSnow()
     while _G.autoNormal do
-        local args = {
-            [1] = workspace.HitParts.Snow1,
-            [2] = "Snow8",
-            [3] = "MagicWand"
-        }
-        game:GetService("ReplicatedStorage").Events.e8eGb8RgRXFcug8q:FireServer(unpack(args))
+        -- Loop through all children in HitParts and select the first one
+        local hitPart = nil
+        for _, part in pairs(game.workspace.HitParts:GetChildren()) do
+            if part:IsA("BasePart") then
+                hitPart = part
+                break
+            end
+        end
+
+        -- If a hit part is found, fire the event
+        if hitPart then
+            local args = {
+                [1] = hitPart,
+                [2] = "Snow8",
+                [3] = "MagicWand"
+            }
+            game:GetService("ReplicatedStorage").Events.e8eGb8RgRXFcug8q:FireServer(unpack(args))
+        end
+        
         wait(0.01)
     end
 end
@@ -44,12 +57,25 @@ end
 -- Function to automate Challenger farming
 local function autoChallenger()
     while _G.autoChallenger do
-        local args = {
-            [1] = game.workspace:FindFirstChild("14 Challenger"),
-            [2] = game.workspace.HitParts.Snow1,
-            [3] = "Snow8"
-        }
-        game:GetService("ReplicatedStorage").Events.uLg98Wsc4r5QT1hb:FireServer(unpack(args))
+        -- Loop through all children in HitParts and select the first one
+        local hitPart = nil
+        for _, part in pairs(game.workspace.HitParts:GetChildren()) do
+            if part:IsA("BasePart") then
+                hitPart = part
+                break
+            end
+        end
+
+        -- If a hit part is found, fire the event
+        if hitPart then
+            local args = {
+                [1] = game.workspace:FindFirstChild("14 Challenger"),
+                [2] = hitPart,
+                [3] = "Snow8"
+            }
+            game:GetService("ReplicatedStorage").Events.uLg98Wsc4r5QT1hb:FireServer(unpack(args))
+        end
+
         wait(0.01)
     end
 end
