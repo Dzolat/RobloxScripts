@@ -434,29 +434,38 @@ end
 ------------------------------------------------------------------------
 
 do
-	local enabled = false
+    local enabled = false
 
-	-- Use the provided API functions
-	local function ToggleFreecam()
-		if enabled then
-			StopFreecamFAPI()
-		else
-			StartFreecamFAPI()
-		end
-		enabled = not enabled
-	end
+    local function ToggleFreecam()
+        if enabled then
+            StopFreecamFAPI()
+        else
+            StartFreecamFAPI()
+        end
+        enabled = not enabled
+    end
 
-	-- Expose API functions to toggle freecam directly
-	function StartFreecamFAPI()
-		if not enabled then
-			ToggleFreecam()
-		end
-	end
-
-	function StopFreecamFAPI()
-		if enabled then
-			ToggleFreecam()
-		end
-	end
+    -- Bind the toggle function to the defined key combination
+    ContextActionService:BindAction(
+        "ToggleFreecam",
+        function(_, state)
+            if state == Enum.UserInputState.Begin then
+                ToggleFreecam()
+            end
+        end,
+        false,
+        table.unpack(FREECAM_MACRO_KB)
+    )
 end
 
+------------------------------------------------------------------------
+
+-- API Function: Start Freecam
+function StartFreecamFAPI()
+    StartFreecam() -- Starts the freecam mode using internal logic.
+end
+
+-- API Function: Stop Freecam
+function StopFreecamFAPI()
+    StopFreecam() -- Stops the freecam mode using internal logic.
+end
