@@ -1,7 +1,3 @@
-------------------------------------------------------------------------
--- Freecam
--- Cinematic free camera for spectating and video production.
-------------------------------------------------------------------------
 
 local pi    = math.pi
 local abs   = math.abs
@@ -342,72 +338,89 @@ local PlayerState = {} do
 
 	-- Save state and set up for freecam
 	function PlayerState.Push()
-		for name in pairs(coreGuis) do
-			coreGuis[name] = StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType[name])
-			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType[name], false)
-		end
-		for name in pairs(setCores) do
-			setCores[name] = StarterGui:GetCore(name)
-			StarterGui:SetCore(name, false)
-		end
-		local playergui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
-		if playergui then
-			for _, gui in pairs(playergui:GetChildren()) do
-				if gui:IsA("ScreenGui") and gui.Enabled then
-					screenGuis[#screenGuis + 1] = gui
-					gui.Enabled = false
-				end
-			end
-		end
+        for name in pairs(coreGuis) do
+            coreGuis[name] = StarterGui:GetCoreGuiEnabled(Enum.CoreGuiType[name])
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType[name], false)
+        end
+        for name in pairs(setCores) do
+            setCores[name] = StarterGui:GetCore(name)
+            StarterGui:SetCore(name, false)
+        end
+        local playergui = LocalPlayer:FindFirstChildOfClass("PlayerGui")
+        if playergui then
+            for _, gui in pairs(playergui:GetChildren()) do
+                if gui:IsA("ScreenGui") and gui.Enabled then
+                    table.insert(screenGuis, gui)
+                    gui.Enabled = false
+                end
+            end
+        end
 
-		cameraFieldOfView = Camera.FieldOfView
-		Camera.FieldOfView = 70
+        if camera then
+            cameraFieldOfView = camera.FieldOfView
+            camera.FieldOfView = 70
 
-		cameraType = Camera.CameraType
-		Camera.CameraType = Enum.CameraType.Custom
+            cameraType = camera.CameraType
+            camera.CameraType = Enum.CameraType.Custom
 
-		cameraCFrame = Camera.CFrame
-		cameraFocus = Camera.Focus
+            cameraCFrame = camera.CFrame
+            cameraFocus = camera.Focus
+        end
 
-		mouseIconEnabled = UserInputService.MouseIconEnabled
-		UserInputService.MouseIconEnabled = false
+        mouseIconEnabled = UserInputService.MouseIconEnabled
+        UserInputService.MouseIconEnabled = false
 
-		mouseBehavior = UserInputService.MouseBehavior
-		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-	end
+        mouseBehavior = UserInputService.MouseBehavior
+        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+    end
 
-	-- Restore state
-	function PlayerState.Pop()
-		for name, isEnabled in pairs(coreGuis) do
-			StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType[name], isEnabled)
-		end
-		for name, isEnabled in pairs(setCores) do
-			StarterGui:SetCore(name, isEnabled)
-		end
-		for _, gui in pairs(screenGuis) do
-			if gui.Parent then
-				gui.Enabled = true
-			end
-		end
+    -- Restore state
+    function PlayerState.Pop()
+        for name, isEnabled in pairs(coreGuis) do
+            StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType[name], isEnabled)
+        end
+        for name, isEnabled in pairs(setCores) do
+            StarterGui:SetCore(name, isEnabled)
+        end
+        for _, gui in pairs(screenGuis) do
+            if gui.Parent then
+                gui.Enabled = true
+            end
+        end
+        screenGuis = {}
 
-		Camera.FieldOfView = cameraFieldOfView
-		cameraFieldOfView = nil
+        if camera then
+            if cameraFieldOfView then
+                camera.FieldOfView = cameraFieldOfView
+                cameraFieldOfView = nil
+            end
 
-		Camera.CameraType = cameraType
-		cameraType = nil
+            if cameraType then
+                camera.CameraType = cameraType
+                cameraType = nil
+            end
 
-		Camera.CFrame = cameraCFrame
-		cameraCFrame = nil
+            if cameraCFrame then
+                camera.CFrame = cameraCFrame
+                cameraCFrame = nil
+            end
 
-		Camera.Focus = cameraFocus
-		cameraFocus = nil
+            if cameraFocus then
+                camera.Focus = cameraFocus
+                cameraFocus = nil
+            end
+        end
 
-		UserInputService.MouseIconEnabled = mouseIconEnabled
-		mouseIconEnabled = nil
+        if mouseIconEnabled ~= nil then
+            UserInputService.MouseIconEnabled = mouseIconEnabled
+            mouseIconEnabled = nil
+        end
 
-		UserInputService.MouseBehavior = mouseBehavior
-		mouseBehavior = nil
-	end
+        if mouseBehavior then
+            UserInputService.MouseBehavior = mouseBehavior
+            mouseBehavior = nil
+        end
+    end
 end
 
 local function StartFreecam()
@@ -415,6 +428,7 @@ local function StartFreecam()
 	cameraRot = Vector2.new(cameraCFrame:toEulerAnglesYXZ())
 	cameraPos = cameraCFrame.p
 	cameraFov = Camera.FieldOfView
+	currentCameraFov = Camera.FieldOfView
 
 	velSpring:Reset(Vector3.new())
 	panSpring:Reset(Vector2.new())
@@ -429,43 +443,6 @@ local function StopFreecam()
 	Input.StopCapture()
 	RunService:UnbindFromRenderStep("Freecam")
 	PlayerState.Pop()
-end
-
-------------------------------------------------------------------------
-
-do
-    local enabled = false
-
-    local function ToggleFreecam()
-        if enabled then
-            StopFreecamFAPI()
-        else
-            StartFreecamFAPI()
-        end
-        enabled = not enabled
-    end
-
-    -- Bind the toggle function to the defined key combination
-    ContextActionService:BindAction(
-        "ToggleFreecam",
-        function(_, state)
-            if state == Enum.UserInputState.Begin then
-                ToggleFreecam()
-            end
-        end,
-        false,
-        table.unpack(FREECAM_MACRO_KB)
-    )
-end
-
-------------------------------------------------------------------------
-
--- API Function: Start Freecam
-function StartFreecamFAPI()
-    StartFreecam() -- Starts the freecam mode using internal logic.
-end
-
--- API Function: Stop Freecam
-function StopFreecamFAPI()
-    StopFreecam() -- Stops the freecam mode using internal logic.
+	Camera.FieldOfView = currentCameraFov
+    UserInputService.MouseIconEnabled = true
 end
