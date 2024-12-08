@@ -436,32 +436,27 @@ end
 do
 	local enabled = false
 
+	-- Use the provided API functions
 	local function ToggleFreecam()
 		if enabled then
-			StopFreecam()
+			StopFreecamFAPI()
 		else
-			StartFreecam()
+			StartFreecamFAPI()
 		end
 		enabled = not enabled
 	end
 
-	local function CheckMacro(macro)
-		for i = 1, #macro - 1 do
-			if not UserInputService:IsKeyDown(macro[i]) then
-				return
-			end
+	-- Expose API functions to toggle freecam directly
+	function StartFreecamFAPI()
+		if not enabled then
+			ToggleFreecam()
 		end
-		ToggleFreecam()
 	end
 
-	local function HandleActivationInput(action, state, input)
-		if state == Enum.UserInputState.Begin then
-			if input.KeyCode == FREECAM_MACRO_KB[#FREECAM_MACRO_KB] then
-				CheckMacro(FREECAM_MACRO_KB)
-			end
+	function StopFreecamFAPI()
+		if enabled then
+			ToggleFreecam()
 		end
-		return Enum.ContextActionResult.Pass
 	end
-
-	ContextActionService:BindActionAtPriority("FreecamToggle", HandleActivationInput, false, TOGGLE_INPUT_PRIORITY, FREECAM_MACRO_KB[#FREECAM_MACRO_KB])
 end
+
